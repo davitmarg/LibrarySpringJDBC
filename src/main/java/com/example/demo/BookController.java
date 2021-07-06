@@ -13,7 +13,7 @@ public class BookController {
 
     @PostMapping(value = "/book")
     public ResponseEntity<Book> addBook(@RequestHeader String username, @RequestHeader String password, @RequestBody Book book) {
-        User user = userDAO.findUser(username, password);
+        User user = userDAO.selectUser(username, password);
         if (user != null && user.getStatus() == Status.ADMIN) {
             return ResponseEntity.ok(bookDAO.insertBook(book));
         }

@@ -107,7 +107,7 @@ public class UserDAO {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    public User findUser(String username, String password) {
+    public User selectUser(String username, String password) {
         try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
             String sql = "SELECT * FROM " + tableName +
                     " WHERE username = ?";
@@ -155,6 +155,43 @@ public class UserDAO {
             throwables.printStackTrace();
         }
         return list;
+    }
+
+    public User updateUser(int id, User user) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "UPDATE " + tableName + " " +
+                    "SET name = ?, surname = ?, mail = ?, mail = ?, username = ?, password = ?, status = ?" +
+                    "WHERE id=?;";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+                user.setPassword(getHash(user.getPassword()));
+                preparedStatement.setString(1, user.getName());
+                preparedStatement.setString(2, user.getSurname());
+                preparedStatement.setString(3, user.getMail());
+                preparedStatement.setString(4, user.getUsername());
+                preparedStatement.setString(5, user.getPassword());
+                preparedStatement.setString(6, user.getStatus().name());
+                preparedStatement.setInt(7, id);
+                preparedStatement.execute();
+                return new User(id, user.getName(), user.getSurname(), user.getMail(), user.getUsername(), user.getPassword(), user.getStatus());
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public void deleteUser(int id) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "DELETE FROM " + tableName + " WHERE id = ? ";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, id);
+                preparedStatement.execute();
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }
 
